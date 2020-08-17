@@ -59,6 +59,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   console.log(to, from)
+  sessionStorage.setItem('path',to.path)
   if (to.path === "/login") {
     return next();
   }

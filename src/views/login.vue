@@ -69,19 +69,21 @@ export default {
           return;
         }
         let { data: res } = await api.login(this.loginForm);
+
         if (res.meta.status == 200) {
           //成功
-          sessionStorage.setItem("token", res.data.token);
-          this.$router.push("/home");
           this.$message({
             message: "恭喜你，登录成功",
             type: "success",
           });
+          sessionStorage.setItem("token", res.data.token);
+          console.log('token',sessionStorage.getItem('token'))
+          this.$router.push("/home");
         } else {
           this.$message({
             message: "登录失败，请检查用户名和密码",
             type: "error",
-            center:true
+            center: true,
           });
         }
         // console.log(res);

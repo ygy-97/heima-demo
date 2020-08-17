@@ -15,13 +15,14 @@
       <el-aside :width="flag?'60px':'200px'">
         <div class="togglebtn" @click="toggleNav">|||</div>
         <el-menu
-          :default-active="leftNav.length>0?leftNav[0].path:''"
+          :default-active="activePath"
           class="el-menu-vertical-demo"
           background-color="#333744"
           text-color="#fff"
           unique-opened
           :collapse="flag"
-          :collapse-transition="false" router
+          :collapse-transition="false"
+          router
         >
           <el-submenu :index="item.id+''" v-for="(item) in leftNav" :key="item.id">
             <template slot="title">
@@ -38,7 +39,7 @@
         </el-menu>
       </el-aside>
       <el-main>
-          <router-view></router-view>
+        <router-view></router-view>
       </el-main>
     </el-container>
   </el-container>
@@ -58,17 +59,21 @@ export default {
         "145": "icon-baobiao",
       },
       flag: false, //左侧导航栏是否收缩
+      activePath: "/users",
     };
   },
   created() {
+    this.activePath = sessionStorage.getItem("path");
     this.getLeftNav();
   },
   methods: {
     //   获得左侧导航栏数据
     async getLeftNav() {
+      console.log("xxxxxxxxxx", sessionStorage.getItem("token"));
       let { data: res } = await api.getLeftNav();
+      if (res.meta.status !== 200)  this.$message.error(res.meta.msg);
       this.leftNav = res.data;
-      console.log(res);
+      console.log("xxx", res);
     },
     // 登出
     checkout() {
@@ -130,6 +135,9 @@ export default {
           height: 18px;
         }
       }
+    }
+    .el-main {
+      background-color: #eaedf1;
     }
   }
 }
