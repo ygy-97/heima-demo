@@ -7,10 +7,20 @@
       <div class="login-box">
         <el-form label-width="80px" ref="loginForm" :rules="loginFormRules" :model="loginForm">
           <el-form-item label="用户名" prop="username">
-            <el-input type="text" v-model="loginForm.username" @input="xxx(loginForm.username)" prefix-icon="el-icon-user"></el-input>
+            <el-input
+              type="text"
+              v-model="loginForm.username"
+              @input="xxx(loginForm.username)"
+              prefix-icon="el-icon-user"
+            ></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="password">
-            <el-input type="password"  show-password v-model="loginForm.password" prefix-icon="el-icon-lock"></el-input>
+            <el-input
+              type="password"
+              show-password
+              v-model="loginForm.password"
+              prefix-icon="el-icon-lock"
+            ></el-input>
           </el-form-item>
         </el-form>
         <div class="login-btn">
@@ -23,38 +33,61 @@
 </template>
 
 <script>
+import api from "../http/api";
+import axios from "../http";
 export default {
-    data(){
-        return{
-            loginForm:{
-                username:'',
-                password:''
-            },
-            loginFormRules:{
-                username:[
-                    {message:'请输入用户名',trigger:'blur'},
-                    {min:2,max:16,message:'请输入2-16位字符',trigger:'blur'}
-                ],
-                password:[
-                    {required:true,message:'请输入密码',trigger:'blur'},
-                    {min:2,max:16,message:'请输入2-16位密码',trigger:'blur'}
-                ]
-            }
-        }
+  data() {
+    return {
+      loginForm: {
+        username: "admin",
+        password: "123456",
+      },
+      loginFormRules: {
+        username: [
+          { required: true, message: "请输入用户名", trigger: "blur" },
+          { min: 2, max: 16, message: "请输入2-16位字符", trigger: "blur" },
+        ],
+        password: [
+          { required: true, message: "请输入密码", trigger: "blur" },
+          { min: 2, max: 16, message: "请输入2-16位密码", trigger: "blur" },
+        ],
+      },
+    };
+  },
+  methods: {
+    //重置表单
+    formReset(dom) {
+      console.log(this);
+      this.$refs[dom].resetFields();
     },
-    methods:{
-        //重置表单
-        formReset(dom){
-            console.log(this)
-            this.$refs[dom].resetFields();
-        },
-        xxx(e){
-            console.log(e)
-        },
-        login(dom){
-            this.$refs[dom].validate(valid=>console.log(valid))
+    xxx(e) {
+      console.log(e);
+    },
+    login(dom) {
+      this.$refs[dom].validate(async (valid) => {
+        if (!valid) {
+          return;
         }
-    }
+        let { data: res } = await api.login(this.loginForm);
+        if (res.meta.status == 200) {
+          //成功
+          sessionStorage.setItem("token", res.data.token);
+          this.$router.push("/home");
+          this.$message({
+            message: "恭喜你，登录成功",
+            type: "success",
+          });
+        } else {
+          this.$message({
+            message: "登录失败，请检查用户名和密码",
+            type: "error",
+            center:true
+          });
+        }
+        // console.log(res);
+      });
+    },
+  },
 };
 </script>
 
