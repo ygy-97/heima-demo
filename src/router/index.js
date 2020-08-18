@@ -58,13 +58,14 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  console.log(to, from)
+  // console.log(to, from)
   sessionStorage.setItem('path',to.path)
+  console.log('router',sessionStorage.getItem('path'))
   if (to.path === "/login") {
     return next();
   }
   const token = sessionStorage.getItem('token');
-  console.log(token)
+  // console.log(token)
   if (!token) {
     return next('/login')
   }

@@ -16,7 +16,6 @@
         <div class="togglebtn" @click="toggleNav">|||</div>
         <el-menu
           :default-active="activePath"
-          class="el-menu-vertical-demo"
           background-color="#333744"
           text-color="#fff"
           unique-opened
@@ -30,7 +29,7 @@
               <span>{{item.authName}}</span>
             </template>
             <template v-if="item.children.length>0">
-              <el-menu-item :index="item1.path" v-for="(item1) in item.children" :key="item1.id">
+              <el-menu-item :index="'/'+item1.path" v-for="(item1) in item.children" :key="item1.id">
                 <i class="iconfont icon-tijikongjian"></i>
                 <span>{{item1.authName}}</span>
               </el-menu-item>
@@ -59,19 +58,20 @@ export default {
         "145": "icon-baobiao",
       },
       flag: false, //左侧导航栏是否收缩
-      activePath: "/users",
+      activePath: "",
     };
   },
+
   created() {
     this.activePath = sessionStorage.getItem("path");
+    console.log("home", this.activePath);
     this.getLeftNav();
   },
   methods: {
     //   获得左侧导航栏数据
     async getLeftNav() {
-      console.log("xxxxxxxxxx", sessionStorage.getItem("token"));
       let { data: res } = await api.getLeftNav();
-      if (res.meta.status !== 200)  this.$message.error(res.meta.msg);
+      if (res.meta.status !== 200) this.$message.error(res.meta.msg);
       this.leftNav = res.data;
       console.log("xxx", res);
     },

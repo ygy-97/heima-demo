@@ -10,7 +10,6 @@
             <el-input
               type="text"
               v-model="loginForm.username"
-              @input="xxx(loginForm.username)"
               prefix-icon="el-icon-user"
             ></el-input>
           </el-form-item>
@@ -60,16 +59,12 @@ export default {
       console.log(this);
       this.$refs[dom].resetFields();
     },
-    xxx(e) {
-      console.log(e);
-    },
     login(dom) {
       this.$refs[dom].validate(async (valid) => {
         if (!valid) {
           return;
         }
         let { data: res } = await api.login(this.loginForm);
-
         if (res.meta.status == 200) {
           //成功
           this.$message({
