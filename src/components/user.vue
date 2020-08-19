@@ -1,10 +1,12 @@
 <template>
   <div class="container">
-    <el-breadcrumb separator="/">
-      <el-breadcrumb-item :to="{ path: '/welcome' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
-    </el-breadcrumb>
+    <el-card class="card-box">
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item :to="{ path: '/welcome' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+        <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-card>
     <main>
       <el-card>
         <div class="top">
@@ -183,19 +185,23 @@ export default {
         email: "",
         mobile: "",
       },
-      changeUser: {},//要修改的对象
-      rolesUser:{},//分配角色
-      role:'',//角色
-      options: [{
-          value: '选项1',
-          label: '超级管理员'
-        }, {
-          value: '选项2',
-          label: '管理员'
-        }, {
-          value: '选项3',
-          label: '普通用户'
-        }],
+      changeUser: {}, //要修改的对象
+      rolesUser: {}, //分配角色
+      role: "", //角色
+      options: [
+        {
+          value: "选项1",
+          label: "超级管理员",
+        },
+        {
+          value: "选项2",
+          label: "管理员",
+        },
+        {
+          value: "选项3",
+          label: "普通用户",
+        },
+      ],
       dialogFormVisible: false, //添加用户弹出层
       dialogChangeVisible: false, //改变用户弹出层
       dialogRoles: false, //改变用户弹出层
@@ -291,36 +297,42 @@ export default {
     },
 
     // 删除用户
-    deleteUser(obj) {
+    async deleteUser(obj) {
       console.log();
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(async () => {
-          let { data: res } = await api.deletePerson(obj.id);
-          if (res.meta.status !== 200) {
-            return this.$message({
-              type: "error",
-              message: "删除失败!",
-              center: true,
-            });
-          }
-          this.$message({
-            type: "success",
-            message: "删除成功!",
+      let flag = await this.$confirm(
+        "此操作将永久删除该文件, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+      // console.log(flag);
+
+      //点击确认
+      if (flag == "confirm") {
+        let { data: res } = await api.deletePerson(obj.id);
+        if (res.meta.status !== 200) {
+          return this.$message({
+            type: "error",
+            message: "删除失败!",
             center: true,
           });
-          this.getTableData(this.currentPage, this.size);
-        })
-        .catch(() => {
-          this.$message({
-            type: "success",
-            center: true,
-            message: "已取消删除",
-          });
+        }
+        this.$message({
+          type: "success",
+          message: "删除成功!",
+          center: true,
         });
+        this.getTableData(this.currentPage, this.size);
+      } else {
+        this.$message({
+          type: "success",
+          center: true,
+          message: "已取消删除",
+        });
+      }
     },
 
     // 分配角色
@@ -328,12 +340,9 @@ export default {
       console.log(obj);
       this.dialogRoles = true;
       this.rolesUser = obj;
-
     },
     // 确定按钮 设置角色
-    setRole(){
-      
-    },
+    setRole() {},
 
     // 修改用户信息 取消按钮事件
     cancelEvent() {

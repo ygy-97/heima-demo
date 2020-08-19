@@ -18,3 +18,4 @@ npm run build
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/). 
 http://gl.timemeetyou.com/#/users 示例
+http://shop.liulongbin.top/

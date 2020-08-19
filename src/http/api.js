@@ -77,7 +77,18 @@ const api = {
     },
 
     // 所有权限列表
+    allRoleList(type){
+        return axios({
+            url:'rights/'+type
+        })
+    },
 
+    // 左侧菜单权限
+    leftMenuRole(){
+        return axios({
+            url:'menus'
+        })
+    }
 
 }
 

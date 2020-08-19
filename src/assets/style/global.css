@@ -1,3 +1,8 @@
 .el-breadcrumb{
     margin-bottom: 20px;
 }
+.card-box{
+    height: 50px;
+    box-shadow: none !important;
+    margin-bottom: 10px;
+}

@@ -7,11 +7,7 @@
       <div class="login-box">
         <el-form label-width="80px" ref="loginForm" :rules="loginFormRules" :model="loginForm">
           <el-form-item label="用户名" prop="username">
-            <el-input
-              type="text"
-              v-model="loginForm.username"
-              prefix-icon="el-icon-user"
-            ></el-input>
+            <el-input type="text" v-model="loginForm.username" prefix-icon="el-icon-user"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="password">
             <el-input
@@ -72,7 +68,7 @@ export default {
             type: "success",
           });
           sessionStorage.setItem("token", res.data.token);
-          console.log('token',sessionStorage.getItem('token'))
+          console.log("token", sessionStorage.getItem("token"));
           this.$router.push("/home");
         } else {
           this.$message({
