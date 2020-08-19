@@ -83,7 +83,7 @@
     </main>
 
     <!-- 添加成员的弹出层 -->
-    <el-dialog title="添加用户" :visible.sync="dialogFormVisible" width="50%">
+    <el-dialog title="添加用户" :visible.sync="dialogFormVisible" width="50%" @close="offDialog">
       <el-form :model="addUser" :rules="formRules" ref="addUserForm">
         <el-form-item label="用户名" prop="username">
           <el-input type="text" v-model="addUser.username"></el-input>
@@ -99,13 +99,13 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button @click="offDialog">取 消</el-button>
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="addUserClick">确 定</el-button>
       </div>
     </el-dialog>
 
     <!-- 修改成员的弹出层 -->
-    <el-dialog title="修改用户" :visible.sync="dialogChangeVisible">
+    <el-dialog title="修改用户" :visible.sync="dialogChangeVisible" @close="cancelEvent">
       <el-form :model="changeUser" ref="changeUserForm" :rules="changeUserRules">
         <el-form-item label="用户名" prop="username">
           <el-input type="text" disabled v-model="changeUser.username"></el-input>
@@ -118,7 +118,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button @click="cancelEvent">取 消</el-button>
+        <el-button @click="dialogChangeVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitData">确 定</el-button>
       </div>
     </el-dialog>
@@ -256,7 +256,7 @@ export default {
 
     // 关闭添加成员的弹出层
     offDialog() {
-      this.dialogFormVisible = false;
+      // this.dialogFormVisible = false;
       this.$refs.addUserForm.resetFields();
     },
 
@@ -346,7 +346,7 @@ export default {
 
     // 修改用户信息 取消按钮事件
     cancelEvent() {
-      this.dialogChangeVisible = false;
+      // this.dialogChangeVisible = false;
       this.$refs.changeUserForm.resetFields();
     },
 

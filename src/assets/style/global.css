@@ -1,8 +1,10 @@
 .el-breadcrumb{
     margin-bottom: 20px;
 }
+.el-card{
+    box-shadow: none !important;
+}
 .card-box{
     height: 50px;
-    box-shadow: none !important;
     margin-bottom: 10px;
 }
