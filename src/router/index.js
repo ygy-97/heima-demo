@@ -29,12 +29,23 @@ const routes = [
       },
       {
         path:'/roles',
-        component:()=> import('../components/roles.vue')
+        component:()=> import('../components/power/roles.vue')
       },
       {
         path:'/rights',
-        component:()=>import('../components/right.vue')
+        component:()=>import('../components/power/right.vue')
       },
+      {
+        path:'/goods',
+        component:()=>import('../components/goods/goodlist.vue')
+      },
+      {
+        path:'/categories',
+        component:()=>import('../components/goods/goodkid.vue')
+      },{
+        path:'/params',
+        component:()=>import('../components/goods/goodparams.vue')
+      }
     ]
   }
   // {

@@ -364,6 +364,7 @@ export default {
         });
       }
       let { data: res } = await api.getRole(this.rolesUser.id, this.role);
+      console.log(res)
       if (res.meta.status !== 200) {
         return this.$message({
           type: "error",
@@ -379,7 +380,7 @@ export default {
       });
       this.getTableData(this.currentPage, size);
       this.dialogChangeVisible = false;
-      console.log(res1, "xxx");
+      // console.log(res1, "xxx");
     },
 
     // 修改用户信息 取消按钮事件
