@@ -70,9 +70,9 @@ const api = {
     // 分配用户角色
     getRole(id,rid){
         return axios({
-            url:'users/'+id/role,
+            url:'users/'+id+'/role',
             method:'put',
-            data:{id,rid}
+            data:{rid}
         })
     },
 

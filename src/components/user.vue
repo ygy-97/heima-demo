@@ -124,17 +124,17 @@
     </el-dialog>
 
     <!-- 分配角色 弹出层 -->
-    <el-dialog title="分配角色" :visible.sync="dialogRoles">
+    <el-dialog title="分配角色" :visible.sync="dialogRoles" @close="offDialog1">
       <p>当前用户：{{rolesUser.username}}</p>
       <p>当前角色：{{rolesUser.role_name}}</p>
       <p>
         分配新角色：
         <el-select v-model="role" placeholder="请选择">
           <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
+            v-for="item in rolesList"
+            :key="item.id"
+            :label="item.roleName"
+            :value="item.id"
           ></el-option>
         </el-select>
       </p>
@@ -187,21 +187,8 @@ export default {
       },
       changeUser: {}, //要修改的对象
       rolesUser: {}, //分配角色
-      role: "", //角色
-      options: [
-        {
-          value: "选项1",
-          label: "超级管理员",
-        },
-        {
-          value: "选项2",
-          label: "管理员",
-        },
-        {
-          value: "选项3",
-          label: "普通用户",
-        },
-      ],
+      role: "", //el-select选中的角色id
+      rolesList: [], //角色数据列表
       dialogFormVisible: false, //添加用户弹出层
       dialogChangeVisible: false, //改变用户弹出层
       dialogRoles: false, //改变用户弹出层
@@ -256,8 +243,13 @@ export default {
 
     // 关闭添加成员的弹出层
     offDialog() {
-      // this.dialogFormVisible = false;
       this.$refs.addUserForm.resetFields();
+    },
+
+    //关闭分配角色 弹出层 
+    offDialog1() {
+      this.role = '';
+      this.rolesList = [];
     },
 
     // 添加成员
@@ -336,13 +328,59 @@ export default {
     },
 
     // 分配角色
-    assignRoles(obj) {
+    async assignRoles(obj) {
+      this.currentUser = obj;
       console.log(obj);
+      // 获取角色列表
+      let { data: res } = await axios.get("roles");
+      if (res.meta.status !== 200) {
+        return this.$message({
+          type: "error",
+          message: "获取角色列表失败",
+          center: true,
+        });
+      }
+      this.$message({
+        type: "success",
+        message: "获取角色列表成功",
+        center: true,
+      });
+      // 获取数据添加到rolesList
+      res.data.forEach((item) => {
+        let obj = { id: item.id, roleName: item.roleName };
+        this.rolesList.push(obj);
+      });
       this.dialogRoles = true;
       this.rolesUser = obj;
     },
     // 确定按钮 设置角色
-    setRole() {},
+    async setRole() {
+      // 分配用户角色
+      if (!this.role) {
+        return this.$message({
+          type: "error",
+          message: "请选择要分配的角色",
+          center: true,
+        });
+      }
+      let { data: res } = await api.getRole(this.rolesUser.id, this.role);
+      if (res.meta.status !== 200) {
+        return this.$message({
+          type: "error",
+          message: "设置角色失败",
+          center: true,
+        });
+      }
+
+      this.$message({
+        type: "success",
+        message: "设置角色成功",
+        center: true,
+      });
+      this.getTableData(this.currentPage, size);
+      this.dialogChangeVisible = false;
+      console.log(res1, "xxx");
+    },
 
     // 修改用户信息 取消按钮事件
     cancelEvent() {
