@@ -12,15 +12,15 @@
     <el-card>
       <!-- 搜索 添加 -->
       <el-row :gutter="20">
-        <el-col :span="10">
-          <el-input placeholder="请输入内容" v-model="searchObj.query">
+        <el-col :span="14">
+          <el-input clearable @clear="searchList" placeholder="请输入内容" v-model="searchObj.query">
             <template slot="append">
-              <i class="el-icon-search"></i>
+              <el-button icon="el-icon-search" @click="searchList"></el-button>
             </template>
           </el-input>
         </el-col>
         <el-col :span="10">
-          <el-button type="primary">添加商品</el-button>
+          <el-button type="primary" @click="showAddDiolog">添加商品</el-button>
         </el-col>
       </el-row>
 
@@ -33,14 +33,19 @@
         <el-table-column prop="add_time" label="创建时间" width="180"></el-table-column>
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
-            <el-button type="primary" size="mini" icon="el-icon-edit">编辑</el-button>
-            <el-button type="danger" size="mini" icon="el-icon-delete">删除</el-button>
+            <el-button type="primary" size="mini" icon="el-icon-edit" @click="showChangeDialog(scope.row)">编辑</el-button>
+            <el-button
+              type="danger"
+              size="mini"
+              icon="el-icon-delete"
+              @click="deleteGood(scope.row)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <!-- 底部分页 -->
-      <el-pagination
+      <el-pagination background
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="searchObj.pagenum"
@@ -50,6 +55,24 @@
         :total="total"
       ></el-pagination>
     </el-card>
+
+    <!-- 添加商品弹出层 -->
+    <el-dialog title="添加商品" :visible.sync="dialogVisible">
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 编辑商品弹出层 -->
+    <el-dialog title="编辑商品" :visible.sync="dialogChangeVisible">
+      <el-form :data="changeItem">
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogChangeVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogChangeVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -58,7 +81,10 @@ import axios from "axios";
 export default {
   data() {
     return {
+      dialogVisible: false, //添加商品弹出层flag
+      dialogChangeVisible: false,
       tableData: [], //table 展示的内容
+      changeItem:{},//要改变的商品对象
       searchObj: {
         query: "", //查询参数
         pagenum: 1, //页码
@@ -69,6 +95,58 @@ export default {
     };
   },
   methods: {
+    // 弹出层显示
+    showAddDiolog() {
+      this.dialogVisible = true;
+    },
+    // 编辑弹出层显示
+    async showChangeDialog(obj) {
+      this.dialogChangeVisible = true;
+      let {data:res} =await axios.get('goods/'+obj.goods_id);
+      this.changeItem = res;
+      console.log(res)
+    },
+
+    // 搜索
+    searchList() {
+      this.getDataList();
+    },
+
+    // 删除商品
+    async deleteGood(obj) {
+      let flag = await this.$confirm(
+        "此操作将永久删除该文件, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+      if (flag == "confirm") {
+        let { data: res } = await axios.delete("goods/" + obj.goods_id);
+        if (res.meta.status !== 200) {
+          return this.$message({
+            type: "error",
+            message: "删除失败!",
+            center: true,
+          });
+        }
+        this.$message({
+          type: "success",
+          message: "删除成功!",
+          center: true,
+        });
+        this.getDataList();
+      } else {
+        this.$message({
+          type: "info",
+          message: "已取消删除",
+          center: true,
+        });
+      }
+    },
+
     //   每页条数改变
     handleSizeChange(size) {
       this.searchObj.pagesize = size;
@@ -90,11 +168,11 @@ export default {
           type: "error",
         });
       }
-      this.$message({
-        center: true,
-        message: "获取商品列表成功",
-        type: "success",
-      });
+      // this.$message({
+      //   center: true,
+      //   message: "获取商品列表成功",
+      //   type: "success",
+      // });
 
       res.data.goods.forEach((item) => {
         let date = new Date(item.add_time);

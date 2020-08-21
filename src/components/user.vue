@@ -18,7 +18,7 @@
           >
             <el-button slot="append" icon="el-icon-search" @click="getTableData(currentPage,size)"></el-button>
           </el-input>
-          <el-button type="primary" @click="dialogFormVisible=!dialogFormVisible">添加用户</el-button>
+          <el-button class="ml" type="primary" @click="dialogFormVisible=!dialogFormVisible">添加用户</el-button>
         </div>
         <div class="center">
           <el-table :data="tableData" border>
@@ -467,10 +467,10 @@ export default {
         .el-input {
           width: 75%;
           .el-button {
-            margin: 0;
+            // margin: 0;
           }
         }
-        .el-button {
+        .el-button.ml {
           margin-left: 10px;
         }
       }
