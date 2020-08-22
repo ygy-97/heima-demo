@@ -10,7 +10,7 @@
     </el-card>
 
     <el-card>
-      <el-button class="mb" type="primary">添加分类</el-button>
+      <el-button class="mb" type="primary" @click="showDialog">添加分类</el-button>
       <!-- <el-table
         :data="tableData"
         border
@@ -43,8 +43,8 @@
         <template slot="temp2" slot-scope="scope">
           <!-- {{scope.row.cat_level}} -->
           <el-tag v-if="scope.row.cat_level==0">一级</el-tag>
-          <el-tag v-if="scope.row.cat_level==1" type="success">二级</el-tag>
-          <el-tag v-if="scope.row.cat_level==2" type="warning">三级</el-tag>
+          <el-tag v-else-if="scope.row.cat_level==1" type="success">二级</el-tag>
+          <el-tag v-else type="warning">三级</el-tag>
         </template>
         <template slot="temp3" slot-scope="scope">
           <el-button size="mini" type="primary" icon="el-icon-edit" @click="editData(scope.row)">编辑</el-button>
@@ -68,6 +68,43 @@
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
       ></el-pagination>
+
+      <!-- 添加分类弹出层 -->
+      <el-dialog title="添加分类" :visible.sync="dialogVisible" @close="closeDialog">
+        <el-form ref="addFormRef" :rules="addFomrRule" :model="addForm" label-width="80px">
+          <el-form-item label="分类名称" prop="cat_name">
+            <el-input v-model="addForm.cat_name"></el-input>
+          </el-form-item>
+          <el-form-item label="父级分类">
+            <el-cascader
+              class="fullWidth"
+              v-model="addForm.cat_pid"
+              :options="fatherData"
+              :props="props"
+              clearable
+              ref="cascader"
+              @change="closeCas"
+            ></el-cascader>
+          </el-form-item>
+        </el-form>
+        <span slot="footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="addCate">确 定</el-button>
+        </span>
+      </el-dialog>
+
+      <!-- 编辑 弹出层 -->
+      <el-dialog title="修改分类" rules="addFomrRule" :visible.sync="dialogNameVisible">
+        <el-form label-width="80px">
+          <el-form-item label="分类名称" prop="cat_name">
+            <el-input v-model="changeUserName"></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer">
+          <el-button @click="dialogNameVisible = false">取 消</el-button>
+          <el-button type="primary" @click="changeName">确 定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -77,13 +114,32 @@ import axios from "axios";
 export default {
   data() {
     return {
-      tableData: [],
+      dialogVisible: false, //弹出层
+      dialogNameVisible: false,
+      tableData: [], //表格数据
+      fatherData: [], //父级分类
+      // selectId: [], //选择的id
+      props: {
+        expandTrigger: true,
+        // multiple:true,
+        value: "cat_id",
+        label: "cat_name",
+        children: "children",
+        checkStrictly: true,
+      },
+      changeUserName: "", // 编辑提交分类名字
+      addForm: {
+        cat_name: "", //分类名称
+        cat_pid: 0, //父级id
+        cat_level: 0, //分类等级
+      }, //添加分类表单
       searchObj: {
         type: 3, //查询参数
         pagenum: 1, //页码
         pagesize: 5, //每页显示条数
       },
       total: 0,
+      currentObj: {}, //当前对象
       // 为table指定列的定义
       columns: [
         {
@@ -109,11 +165,114 @@ export default {
           template: "temp3",
         },
       ],
+      addFomrRule: {
+        cat_name: [{ required: true, message: "请输入内容", trigger: "blur" }],
+      },
     };
   },
   methods: {
+    // 关闭弹出层
+    closeDialog() {
+      this.$refs.addFormRef.resetFields(); //重置表单
+      this.addForm.cat_pid = []; //选择id置为空
+    },
+
+    // 点击后关闭cascader
+    closeCas() {
+      this.$refs.cascader.dropDownVisible = false;
+    },
+    async showDialog() {
+      this.dialogVisible = true;
+      // 获取父级12 层父级分类
+      let { data: res } = await axios.get("categories", {
+        params: { type: 2 },
+      });
+      console.log("xx11", res);
+      if (res.meta.status !== 200) {
+        return this.$message({
+          center: true,
+          message: "获取父级分类数据失败",
+          type: "error",
+        });
+      }
+      this.$message({
+        center: true,
+        message: "获取父级分类数据成功",
+        type: "success",
+      });
+      this.fatherData = res.data;
+    },
+    //确定按钮 添加分类
+    addCate() {
+      this.$refs.addFormRef.validate(async (valid) => {
+        if (valid) {
+          //校验成功
+          let { cat_pid, cat_name, cat_level } = this.addForm;
+          this.addForm.cat_level = cat_pid.length || 0;
+          this.addForm.cat_pid =
+            cat_pid.length - 1 >= 0 ? cat_pid[cat_pid.length - 1] : 0;
+          let { data: res } = await axios.post("categories", this.addForm);
+          console.log(res);
+          if (res.meta.status !== 201) {
+            return this.$message({
+              message: "创建失败",
+              center: true,
+              type: "error",
+            });
+          }
+          this.$message({
+            message: "创建成功",
+            center: true,
+            type: "success",
+          });
+          this.dialogVisible = false;
+          this.getDataList();
+        }
+      });
+    },
+
     // 编辑
-    editData(obj) {},
+    async editData(obj) {
+      // console.log(obj)
+      this.dialogNameVisible = true;
+      this.currentObj = obj;
+      // id 查询分类
+      let { data: res } = await axios.get("categories/" + obj.cat_id);
+      this.changeUserName = res.data.cat_name;
+      console.log(res);
+      if (res.meta.status !== 200) {
+        return this.$message({
+          center: true,
+          message: "编辑失败",
+          type: "error",
+        });
+      }
+    },
+
+    // 改变分类名称 确定按钮
+    async changeName() {
+      let { data: res } = await axios.put(
+        "categories/" + this.currentObj.cat_id,
+        {
+          cat_name: this.changeUserName,
+        }
+      );
+      console.log(res);
+      if (res.meta.status !== 200) {
+        return this.$message({
+          center: true,
+          message: "修改分类名称失败",
+          type: "error",
+        });
+      }
+      this.$message({
+        center: true,
+        message: "修改分类名称成功",
+        type: "success",
+      });
+      this.dialogNameVisible = false;
+      this.getDataList();
+    },
     // 删除
     async deleteData(obj) {
       let flag = await this.$confirm(
@@ -164,13 +323,13 @@ export default {
           type: "error",
         });
       }
-      this.$message({
-        center: true,
-        message: "获取商品分类成功",
-        type: "success",
-      });
+      // this.$message({
+      //   center: true,
+      //   message: "获取商品分类成功",
+      //   type: "success",
+      // });
       this.tableData = res.data.result;
-      console.log(this.tableData);
+      // console.log(this.tableData);
       this.total = res.data.total;
     },
     // 每页显示条数
@@ -202,5 +361,8 @@ export default {
 }
 .mb {
   margin-bottom: 10px;
+}
+.fullWidth {
+  width: 100%;
 }
 </style>

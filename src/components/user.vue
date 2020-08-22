@@ -84,7 +84,7 @@
 
     <!-- 添加成员的弹出层 -->
     <el-dialog title="添加用户" :visible.sync="dialogFormVisible" width="50%" @close="offDialog">
-      <el-form :model="addUser" :rules="formRules" ref="addUserForm">
+      <el-form :model="addUser" :rules="formRules" ref="addUserForm" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input type="text" v-model="addUser.username"></el-input>
         </el-form-item>
@@ -106,7 +106,7 @@
 
     <!-- 修改成员的弹出层 -->
     <el-dialog title="修改用户" :visible.sync="dialogChangeVisible" @close="cancelEvent">
-      <el-form :model="changeUser" ref="changeUserForm" :rules="changeUserRules">
+      <el-form :model="changeUser" ref="changeUserForm" :rules="changeUserRules" label-width="70px">
         <el-form-item label="用户名" prop="username">
           <el-input type="text" disabled v-model="changeUser.username"></el-input>
         </el-form-item>
