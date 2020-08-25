@@ -11,22 +11,6 @@
 
     <el-card>
       <el-button class="mb" type="primary" @click="showDialog">添加分类</el-button>
-      <!-- <el-table
-        :data="tableData"
-        border
-      >
-        <el-table-column type="index" prop="#"></el-table-column>
-        <el-table-column prop="cat_name" label="分类名称" width="180"></el-table-column>
-        <el-table-column prop="cat_deleted" label="是否有效" width="180"></el-table-column>
-        <el-table-column prop="cat_level" label="排序"></el-table-column>
-        <el-table-column label="操作" width="190">
-          <template slot-scope="scope">
-            <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
-            <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>-->
-
       <tree-table
         :data="tableData"
         border
