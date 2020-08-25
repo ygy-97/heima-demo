@@ -411,25 +411,11 @@ export default {
           let id = this.value[this.value.length - 1];
           let attrId = this.form1.attr_id;
           let attr_sel = this.tabIndex == "0" ? "many" : "only";
-          let { data: res } = await axios.put(
-            `categories/${id}/attributes/${attrId}`,
-            {
-              attr_name: this.form1.attr_name,
-              attr_sel,
-            }
-          );
-          if (res.meta.status !== 200) {
-            return this.$message({
-              message: "修改数据失败",
-              center: true,
-              type: "error",
-            });
-          }
-          this.$message({
-            message: "修改数据成功",
-            center: true,
-            type: "success",
-          });
+          let data = {
+            attr_name: this.form1.attr_name,
+            attr_sel,
+          };
+          this.editParams(id, attrId, data);
           this.getParamsList(id, this.type); //获取数据
           this.dialogDtVisible = false;
         }
