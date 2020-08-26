@@ -20,20 +20,29 @@
           </el-input>
         </el-col>
         <el-col :span="10">
-          <el-button type="primary" @click="showAddDiolog">添加商品</el-button>
+          <el-button type="primary" @click="toAddGood">添加商品</el-button>
         </el-col>
       </el-row>
 
       <!-- 表格区域 -->
       <el-table :data="tableData" border>
         <el-table-column type="index" label="#"></el-table-column>
-        <el-table-column prop="goods_name" label="商品名称"></el-table-column>
+        <el-table-column prop="goods_name"  label="商品名称" width='400'></el-table-column>
         <el-table-column prop="goods_price" label="商品价格(元)"></el-table-column>
         <el-table-column prop="goods_weight" label="商品重量"></el-table-column>
-        <el-table-column prop="add_time" label="创建时间" width="180"></el-table-column>
+        <el-table-column prop="add_time" label="创建时间" width="160">
+          <template slot-scope="scope">
+            {{scope.row.add_time | timeFormat}}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
-            <el-button type="primary" size="mini" icon="el-icon-edit" @click="showChangeDialog(scope.row)">编辑</el-button>
+            <el-button
+              type="primary"
+              size="mini"
+              icon="el-icon-edit"
+              @click="showChangeDialog(scope.row)"
+            >编辑</el-button>
             <el-button
               type="danger"
               size="mini"
@@ -45,7 +54,8 @@
       </el-table>
 
       <!-- 底部分页 -->
-      <el-pagination background
+      <el-pagination
+        background
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="searchObj.pagenum"
@@ -66,8 +76,7 @@
 
     <!-- 编辑商品弹出层 -->
     <el-dialog title="编辑商品" :visible.sync="dialogChangeVisible">
-      <el-form :data="changeItem">
-      </el-form>
+      <el-form :data="changeItem"></el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogChangeVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogChangeVisible = false">确 定</el-button>
@@ -84,7 +93,7 @@ export default {
       dialogVisible: false, //添加商品弹出层flag
       dialogChangeVisible: false,
       tableData: [], //table 展示的内容
-      changeItem:{},//要改变的商品对象
+      changeItem: {}, //要改变的商品对象
       searchObj: {
         query: "", //查询参数
         pagenum: 1, //页码
@@ -94,7 +103,24 @@ export default {
       total: 0, //总条数
     };
   },
+  filters: {
+    timeFormat(value) {
+      let time = new Date(value);
+      var y = time.getFullYear();
+      var m = (time.getMonth() + 1+'').padStart(2,'0');
+      var d = (time.getDate()+'').padStart(2,0);
+      var h = (time.getHours()+'').padStart(2,0);
+      var mm = (time.getMinutes()+'').padStart(2,0);
+      var s = (time.getSeconds()+'').padStart(2,0);
+      return `${y}-${m}-${d} ${h}:${mm}:${s}`;
+    },
+  },
   methods: {
+    // 跳转到添加good页面
+    toAddGood() {
+      this.$router.push("/goods/addgood");
+    },
+
     // 弹出层显示
     showAddDiolog() {
       this.dialogVisible = true;
@@ -102,9 +128,9 @@ export default {
     // 编辑弹出层显示
     async showChangeDialog(obj) {
       this.dialogChangeVisible = true;
-      let {data:res} =await axios.get('goods/'+obj.goods_id);
+      let { data: res } = await axios.get("goods/" + obj.goods_id);
       this.changeItem = res;
-      console.log(res)
+      console.log(res);
     },
 
     // 搜索
@@ -174,43 +200,15 @@ export default {
       //   type: "success",
       // });
 
-      res.data.goods.forEach((item) => {
-        let date = new Date(item.add_time);
-        item.add_time = this.format(item.add_time);
-      });
+      // res.data.goods.forEach((item) => {
+      //   let date = new Date(item.add_time);
+      //   item.add_time = this.format(item.add_time);
+      // });
 
       this.tableData = res.data.goods;
       this.total = res.data.total;
       this.currentPage = res.data.pagenum;
       console.log(res);
-    },
-
-    // 时间格式处理
-    add0(m) {
-      return m < 10 ? "0" + m : m;
-    },
-    format(shijianchuo) {
-      //shijianchuo是整数，否则要parseInt转换
-      var time = new Date(shijianchuo);
-      var y = time.getFullYear();
-      var m = time.getMonth() + 1;
-      var d = time.getDate();
-      var h = time.getHours();
-      var mm = time.getMinutes();
-      var s = time.getSeconds();
-      return (
-        y +
-        "-" +
-        this.add0(m) +
-        "-" +
-        this.add0(d) +
-        " " +
-        this.add0(h) +
-        ":" +
-        this.add0(mm) +
-        ":" +
-        this.add0(s)
-      );
     },
   },
   created() {
@@ -220,6 +218,9 @@ export default {
 </script>
 
 <style scoped lang='less'>
+.container{
+  min-width: 1000px;
+}
 .el-pagination {
   margin-top: 10px;
   text-align: center;

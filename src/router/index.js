@@ -17,50 +17,40 @@ const routes = [
   }, {
     path: '/home',
     component: Home,
-    redirect:'/welcome',
-    children:[
+    redirect: '/welcome',
+    children: [
       {
-        path:'/welcome',
-        component:Welcome
+        path: '/welcome',
+        component: Welcome
       },
       {
-        path:'/users',
-        component:User
+        path: '/users',
+        component: User
       },
       {
-        path:'/roles',
-        component:()=> import('../components/power/roles.vue')
+        path: '/roles',
+        component: () => import('../components/power/roles.vue')
       },
       {
-        path:'/rights',
-        component:()=>import('../components/power/right.vue')
+        path: '/rights',
+        component: () => import('../components/power/right.vue')
       },
       {
-        path:'/goods',
-        component:()=>import('../components/goods/goodlist.vue')
+        path: '/goods',
+        component: () => import('../components/goods/goodlist.vue'),
+      }, {
+        path: '/goods/addgood',
+        component: () => import('../components/goods/addgood.vue')
       },
       {
-        path:'/categories',
-        component:()=>import('../components/goods/goodkid.vue')
-      },{
-        path:'/params',
-        component:()=>import('../components/goods/goodparams.vue')
+        path: '/categories',
+        component: () => import('../components/goods/goodkid.vue')
+      }, {
+        path: '/params',
+        component: () => import('../components/goods/goodparams.vue')
       }
     ]
   }
-  // {
-  //   path: '/',
-  //   name: 'Home',
-  //   component: Home
-  // },
-  // {
-  //   path: '/about',
-  //   name: 'About',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  // }
 ]
 
 
@@ -69,9 +59,8 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  // console.log(to, from)
-  sessionStorage.setItem('path',to.path)
-  console.log('router',sessionStorage.getItem('path'))
+  sessionStorage.setItem('path', to.path=='/goods/addgood'?'/goods':to.path)
+  // console.log('router', to)
   if (to.path === "/login") {
     return next();
   }

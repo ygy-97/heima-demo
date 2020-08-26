@@ -1,10 +1,20 @@
-.el-breadcrumb{
+.el-breadcrumb {
     margin-bottom: 20px;
 }
-.el-card{
+
+.el-card {
     box-shadow: none !important;
 }
-.card-box{
+
+.card-box {
     height: 50px;
     margin-bottom: 10px;
+}
+
+.el-steps {
+    margin: 15px;
+}
+
+.el-step__title {
+    font-size: 13px;
 }

@@ -73,7 +73,7 @@
               <el-table-column type="expand">
                 <template slot-scope="scope">
                   <el-tag
-                    :key="tag"
+                    :key="tag.id"
                     v-for="tag in scope.row.attr_vals"
                     closable
                     :disable-transitions="false"
@@ -181,7 +181,7 @@ export default {
   },
   methods: {
     // 标签项删除
-    handleClose(obj, tag) {
+    handleClose(obj) {
       let i = obj.attr_vals.indexOf(obj.attr_name);
       obj.attr_vals.splice(i, 1);
       let data = {
@@ -192,7 +192,6 @@ export default {
 
       let id = this.value[this.value.length - 1];
       this.editParams(id, obj.attr_id, data);
-      console.log(obj, tag, i, obj.attr_vals);
     },
 
     // 点击按钮显示文本框
