@@ -14,7 +14,8 @@ const routes = [
   {
     path: '/login',
     component: Login
-  }, {
+  },
+  {
     path: '/home',
     component: Home,
     redirect: '/welcome',
@@ -28,26 +29,36 @@ const routes = [
         component: User
       },
       {
-        path: '/roles',
+        path: '/roles',//角色列表
         component: () => import('../components/power/roles.vue')
       },
       {
-        path: '/rights',
+        path: '/rights',//权限列表
         component: () => import('../components/power/right.vue')
       },
       {
-        path: '/goods',
+        path: '/goods',//商品列表
         component: () => import('../components/goods/goodlist.vue'),
-      }, {
+      },
+      {
         path: '/goods/addgood',
         component: () => import('../components/goods/addgood.vue')
       },
       {
-        path: '/categories',
+        path: '/categories',//商品分类
         component: () => import('../components/goods/goodkid.vue')
-      }, {
-        path: '/params',
+      },
+      {
+        path: '/params',//商品分类参数
         component: () => import('../components/goods/goodparams.vue')
+      },
+      {
+        path: '/orders',//订单管理
+        component: () => import('../components/orders.vue')
+      },
+      {
+        path: '/reports',//数据报表
+        component: () => import('../components/reports.vue')
       }
     ]
   }
@@ -59,8 +70,8 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  sessionStorage.setItem('path', to.path=='/goods/addgood'?'/goods':to.path)
-  // console.log('router', to)
+  sessionStorage.setItem('path', to.path == '/goods/addgood' ? '/goods' : to.path)
+  console.log('router', to.path)
   if (to.path === "/login") {
     return next();
   }
