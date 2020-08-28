@@ -58,33 +58,54 @@
           </el-tab-pane>
           <el-tab-pane label="商品参数">
             <!-- 商品动态参数 -->
-            <template v-if="paramsData.length>0">
-              <p>{{paramsData[0].attr_vals}}</p>
-            </template>
+            <!-- <template v-if="paramsData.length>0"> -->
+            <el-form-item
+              :label="item.attr_name"
+              :key="item.attr_id"
+              v-for="item in paramsManyData"
+            >
+              <el-checkbox-group :key="item.attr_id" v-model="item.attr_vals">
+                <el-checkbox :label="it" :key="i" v-for="(it,i) in item.attr_vals"></el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+            <!-- </template> -->
           </el-tab-pane>
           <el-tab-pane label="商品属性">
-            <!-- <p>{{paramsData[0].attr_vals}}</p> -->
+            <el-form-item
+              :label="item.attr_name"
+              :key="item.attr_id"
+              v-for="(item) in paramsOnlyData"
+            >
+              <el-input v-model="''+item.attr_vals"></el-input>
+            </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="商品图片">
             <el-upload
-              action="https://jsonplaceholder.typicode.com/posts/"
+              action="http://timemeetyou.com:8889/api/private/v1/upload"
               :on-preview="handlePreview"
               :on-remove="handleRemove"
-              :before-remove="beforeRemove"
-              multiple
-              :limit="3"
-              :on-exceed="handleExceed"
-              :file-list="fileList"
+              :on-success="successFile"
+              list-type="picture"
+              :headers="headers"
             >
               <el-button size="small" type="primary">点击上传</el-button>
-              <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
             </el-upload>
           </el-tab-pane>
-          <el-tab-pane label="商品内容">商品内容</el-tab-pane>
-          <el-tab-pane label="完成">完成</el-tab-pane>
+          <el-tab-pane label="商品内容">
+            <!-- 富文本编辑器 -->
+            <quill-editor ref="myQuillEditor" v-model="addForm.goods_introduce"></quill-editor>
+          </el-tab-pane>
+          <el-tab-pane label="完成">
+            <el-button type="primary" @click="addGood">添加商品</el-button>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
+
+    <!-- 图片预览  -->
+    <el-dialog title="图片预览" :visible.sync="dialogVisible" width="50%" @close="dialogVisible=false">
+      <el-image :src="prevUrl"></el-image>
+    </el-dialog>
   </div>
 </template>
 
@@ -93,16 +114,19 @@ import axios from "axios";
 export default {
   data() {
     return {
+      prevUrl: "", //图片预览路径
+      dialogVisible: false, //弹出层
+      headers: { Authorization: sessionStorage.getItem("token") }, //上传图片请求头设置
       activeIndex: 0, //激活的index
       addForm: {
         goods_name: "",
         goods_cat: [], //分类
-        goods_price: "",
-        goods_number: "",
-        goods_weight: "",
+        goods_price: 1,
+        goods_number: 1,
+        goods_weight: 1,
         goods_introduce: "",
-        pics: "",
-        attrs: "",
+        pics: [],
+        attrs: [],
       },
       rules: {
         goods_name: [
@@ -123,10 +147,88 @@ export default {
       },
       options: [], //联级选择数据源
       kidArr: [], //商品分类id
-      paramsData: [],
+      paramsManyData: [], //many
+      paramsOnlyData: [], //Only
     };
   },
   methods: {
+    // 添加商品
+    addGood() {
+      this.$refs.addFormRef.validate(async (valid) => {
+        if (valid) {
+          //校验成功
+          let data = JSON.stringify(this.addForm);
+          data = JSON.parse(data);
+          data.goods_cat = data.goods_cat.join(",");
+
+          // 动态参数
+          this.paramsManyData.forEach((item) => {
+            data.attrs.push({
+              attr_id: item.attr_id,
+              attr_value: item.attr_vals.join(" "),
+            });
+          });
+
+          // 静态属性
+          this.paramsOnlyData.forEach((item) => {
+            data.attrs.push({
+              attr_id: item.attr_id,
+              attr_value: item.attr_vals,
+            });
+          });
+          // console.log(this.paramsOnlyData)
+          // console.log('zxxxx',data.attrs)
+          // return;
+          console.log(data)
+          let { data: res } = await axios.post("goods", data);
+          console.log(res);
+          if (res.meta.status !== 201) {
+            return this.$message({
+              message: "商品创建失败",
+              center: true,
+              type: "error",
+            });
+          }
+          this.$message({
+            message: "商品创建成功",
+            center: true,
+            type: "success",
+          });
+          this.$router.push("/goods");
+        } else {
+          this.$message({
+            message: "请填写表单必填项",
+            center: true,
+            type: "error",
+          });
+        }
+      });
+    },
+
+    //图片预览功能
+    handlePreview(file) {
+      this.prevUrl = file.response.data.url;
+      this.dialogVisible = true;
+      console.log(file);
+    },
+    // 文件列表移除文件
+    handleRemove(file, fileList) {
+      console.log("xx", file);
+      let path = file.response.data.tmp_path;
+      this.addForm.pics.forEach((item, index) => {
+        if (item.pic == path) {
+          this.addForm.pics.splice(index, 1);
+        }
+      });
+      console.log(this.addForm.pics);
+    },
+    // 文件上传成功
+    successFile(response, file, fileList) {
+      console.log("res", response);
+
+      this.addForm.pics.push({ pic: response.data.tmp_path });
+      console.log(this.addForm.pics);
+    },
     //tabs before-leave
     beforeLeave(activeIndex, oldIndex) {
       console.log(activeIndex, oldIndex);
@@ -163,13 +265,22 @@ export default {
           center: true,
         });
       }
+      let flag = type == "many" ? "动态参数" : "静态参数";
       this.$message({
         type: "success",
-        message: "数据获取成功",
+        message: flag + "获取成功",
         center: true,
       });
-      this.paramsData = res.data;
-      console.log("xs", res);
+      if (type == "many") {
+        res.data.forEach((item) => {
+          item.attr_vals =
+            item.attr_vals.length == 0 ? [] : item.attr_vals.split(" ");
+        });
+        this.paramsManyData = res.data;
+      } else {
+        this.paramsOnlyData = res.data;
+      }
+      console.log("xs", res.data);
     },
 
     // tab切换
@@ -210,5 +321,12 @@ export default {
 <style scoped lang='less'>
 .el-cascader {
   // width: 100%;
+}
+.el-checkbox {
+  margin: 10px;
+}
+.quill-editor {
+  height: 200px !important;
+  margin-bottom: 100px !important;
 }
 </style>

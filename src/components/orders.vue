@@ -117,8 +117,8 @@ export default {
       this.dialogTimeVisible = true;
 
       console.log(row);
-      let id = row.user_id;
-      let { data: res } = await axios.get("orders/" + id);
+      let id = row.order_number;
+      let { data: res } = await axios.get("kuaidi/" + id);//查看物流信息
       console.log(res);
       if (res.meta.status !== 200) {
         return this.$message({
