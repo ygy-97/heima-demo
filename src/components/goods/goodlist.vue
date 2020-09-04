@@ -27,13 +27,11 @@
       <!-- 表格区域 -->
       <el-table :data="tableData" border>
         <el-table-column type="index" label="#"></el-table-column>
-        <el-table-column prop="goods_name"  label="商品名称" width='400'></el-table-column>
+        <el-table-column prop="goods_name" label="商品名称" width="400"></el-table-column>
         <el-table-column prop="goods_price" label="商品价格(元)"></el-table-column>
         <el-table-column prop="goods_weight" label="商品重量"></el-table-column>
         <el-table-column prop="add_time" label="创建时间" width="160">
-          <template slot-scope="scope">
-            {{scope.row.add_time | timeFormat}}
-          </template>
+          <template slot-scope="scope">{{scope.row.add_time | timeFormat}}</template>
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
@@ -66,20 +64,28 @@
       ></el-pagination>
     </el-card>
 
-    <!-- 添加商品弹出层 -->
-    <el-dialog title="添加商品" :visible.sync="dialogVisible">
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>
-
     <!-- 编辑商品弹出层 -->
-    <el-dialog title="编辑商品" :visible.sync="dialogChangeVisible">
-      <el-form :data="changeItem"></el-form>
+    <el-dialog title="编辑商品"  :visible.sync="dialogChangeVisible" >
+      <el-form ref="changeForm" :model="changeItem" :rules="changeRules">
+        <el-form-item label="商品名称" prop="goods_name">
+          <el-input type="text" v-model="changeItem.goods_name"></el-input>
+        </el-form-item>
+        <el-form-item label="商品价格" prop="goods_price">
+          <el-input type="number" v-model="changeItem.goods_price"></el-input>
+        </el-form-item>
+        <el-form-item label="商品数量" prop="goods_number">
+          <el-input type="number" v-model="changeItem.goods_number"></el-input>
+        </el-form-item>
+        <el-form-item label="商品重量" prop="goods_weight">
+          <el-input type="number" v-model="changeItem.goods_weight"></el-input>
+        </el-form-item>
+        <el-form-item label="商品介绍" prop="goods_introduce">
+          <el-input type="text" v-model="changeItem.goods_introduce"></el-input>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogChangeVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogChangeVisible = false">确 定</el-button>
+        <el-button type="primary" @click="changeSubmit">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -90,8 +96,7 @@ import axios from "axios";
 export default {
   data() {
     return {
-      dialogVisible: false, //添加商品弹出层flag
-      dialogChangeVisible: false,
+      dialogChangeVisible: false, //改变商品弹出层flag
       tableData: [], //table 展示的内容
       changeItem: {}, //要改变的商品对象
       searchObj: {
@@ -101,21 +106,62 @@ export default {
       },
       //   currentPage: 1, //当前页码
       total: 0, //总条数
+      changeRules: {
+        goods_name: [
+          { required: true, message: "商品名称不能为空", trigger: "blur" },
+        ],
+        goods_price: [
+           { required: true, message: "商品价格不能为空", trigger: "blur" },
+          ],
+        goods_number: [
+          { required: true, message: "商品数量不能为空", trigger: "blur" },
+        ],
+        goods_weight: [
+          { required: true, message: "商品重量不能为空", trigger: "blur" },
+        ],
+        goods_introduce: [
+          { required: false, message: "商品介绍不能为空", trigger: "blur" },
+        ],
+      },
     };
   },
   filters: {
     timeFormat(value) {
       let time = new Date(value);
       var y = time.getFullYear();
-      var m = (time.getMonth() + 1+'').padStart(2,'0');
-      var d = (time.getDate()+'').padStart(2,0);
-      var h = (time.getHours()+'').padStart(2,0);
-      var mm = (time.getMinutes()+'').padStart(2,0);
-      var s = (time.getSeconds()+'').padStart(2,0);
+      var m = (time.getMonth() + 1 + "").padStart(2, "0");
+      var d = (time.getDate() + "").padStart(2, 0);
+      var h = (time.getHours() + "").padStart(2, 0);
+      var mm = (time.getMinutes() + "").padStart(2, 0);
+      var s = (time.getSeconds() + "").padStart(2, 0);
       return `${y}-${m}-${d} ${h}:${mm}:${s}`;
     },
   },
   methods: {
+
+    //  编辑提交商品
+    async changeSubmit(){
+      console.log(this.changeItem.goods_id,this.changeItem)
+      let id = this.changeItem.goods_id;
+      let {data:res} = await axios.put('goods/'+id,this.changeItem);
+      console.log(res)
+      if(res.meta.status!=200){
+        return this.$message({
+          center:true,
+          message:'修改商品数据失败',
+          type:'error'
+        })
+      }
+      this.$message({
+        center:true,
+        message:'修改商品数据成功',
+        type:'success'
+      })
+      this.getDataList();
+      this.dialogChangeVisible = false;
+    },
+
+
     // 跳转到添加good页面
     toAddGood() {
       this.$router.push("/goods/addgood");
@@ -127,10 +173,18 @@ export default {
     },
     // 编辑弹出层显示
     async showChangeDialog(obj) {
-      this.dialogChangeVisible = true;
+      console.log(obj.goods_id);
       let { data: res } = await axios.get("goods/" + obj.goods_id);
-      this.changeItem = res;
-      console.log(res);
+      if (res.meta.status !== 200) {
+        return this.$message({
+          message: "编辑数据获取失败",
+          center: true,
+          type: "error",
+        });
+      }
+      this.changeItem = res.data;
+      this.dialogChangeVisible = true;
+      console.log("xxx", res.data);
     },
 
     // 搜索
@@ -218,7 +272,7 @@ export default {
 </script>
 
 <style scoped lang='less'>
-.container{
+.container {
   min-width: 1000px;
 }
 .el-pagination {

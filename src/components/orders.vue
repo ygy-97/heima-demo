@@ -10,12 +10,12 @@
     </el-card>
 
     <el-card>
-      <el-input placeholder="请输入内容" v-model="searchValue" class="input-with-select">
+      <el-input placeholder="请输入内容" v-model="ordersObj.query" class="input-with-select">
         <el-button slot="append" icon="el-icon-search" @click="searchData"></el-button>
       </el-input>
 
       <!-- 表格 -->
-      <el-table :data="dataList" border>
+      <el-table :data="dataList" border stripe>
         <el-table-column prop="#" type="index"></el-table-column>
         <el-table-column prop="order_number" label="订单编号"></el-table-column>
         <el-table-column prop="order_price" label="订单价格" align="center"></el-table-column>
@@ -33,7 +33,12 @@
         </el-table-column>
         <el-table-column prop="name" label="操作">
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" icon="el-icon-edit"></el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              icon="el-icon-edit"
+              @click="dialogAddressVisible=true"
+            ></el-button>
             <el-button
               size="mini"
               type="success"
@@ -51,36 +56,58 @@
         @current-change="handleCurrentChange"
         :current-page="ordersObj.pagenum"
         :page-sizes="[5, 10, 20, 30]"
-        :page-size="100"
+        :page-size="ordersObj.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
       ></el-pagination>
     </el-card>
 
     <!-- 物流进度弹出框 -->
-    <el-dialog :visible.sync="dialogTimeVisible">
-      <!-- <el-timeline :reverse="true">
+    <el-dialog title="物流进度" :visible.sync="dialogTimeVisible" @close="clearData">
+      <el-timeline :reverse="true">
         <el-timeline-item
-          v-for="(activity, index) in timeStep"
+          v-for="(item, index) in timeStep"
           :key="index"
-          :timestamp="activity.timestamp"
-        >{{activity.content}}</el-timeline-item>
-      </el-timeline>-->
+          :timestamp="item.time"
+        >{{item.context}}</el-timeline-item>
+      </el-timeline>
     </el-dialog>
 
     <!-- 修改地址弹出框 -->
-    <el-dialog :visible.sync="dialogAddressVisible"></el-dialog>
+    <el-dialog title="修改地址" :visible.sync="dialogAddressVisible" @close="resetForm">
+      <el-form ref="addressRef" :model="addressForm" :rules="addressRules">
+        <el-form-item label="省市区/县" prop="add1" label-width="90px">
+          <el-cascader v-model="addressForm.add1" :options="cityData" :props="{ expandTrigger: 'hover' }"></el-cascader>
+        </el-form-item>
+        <el-form-item label="详细地址" prop="add2" label-width="90px">
+          <el-input v-model="addressForm.add2"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogAddressVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogAddressVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import cityData from "./citydata";
 export default {
   data() {
     return {
+      cityData,
+      addressForm: {
+        add1: "",
+        add2: "",
+      },
+      addressRules: {
+        add1: [{ required: true, message: "请选择省市区", trigger: "blur" }],
+        add2: [{ required: true, message: "请输入地址", trigger: "blur" }],
+      },
       dialogAddressVisible: false, //修改地址弹出框
       dialogTimeVisible: false, //物流进度弹出框
-      searchValue: "", //查询关键字
       ordersObj: {
         //订单数据列表
         query: "",
@@ -112,13 +139,21 @@ export default {
     },
   },
   methods: {
+    resetForm(){
+      this.$refs.addressRef.resetFields();
+    },
+
+    // 物流弹出层关闭时，清空数据
+    clearData() {
+      this.timeStep = [];
+    },
+
     //   物流信息数据
     async getTimeStep(row) {
       this.dialogTimeVisible = true;
-
       console.log(row);
-      let id = row.order_number;
-      let { data: res } = await axios.get("kuaidi/" + id);//查看物流信息
+      let id = 1106975712662;
+      let { data: res } = await axios.get("kuaidi/" + id); //查看物流信息
       console.log(res);
       if (res.meta.status !== 200) {
         return this.$message({
@@ -134,6 +169,7 @@ export default {
       });
       this.timeStep = res.data;
       this.dialogTimeVisible = true;
+      console.log(this.timeStep);
     },
 
     // 搜索按钮查询
@@ -184,8 +220,11 @@ export default {
   min-width: 900px;
 }
 .el-input {
-  width: 50%;
+  width: 100%;
   margin-bottom: 10px;
+}
+.el-cascader {
+  width: 100%;
 }
 .el-pagination {
   margin-top: 10px;
