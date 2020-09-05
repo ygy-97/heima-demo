@@ -1,9 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../views/login.vue'
-import Home from '../views/home.vue'
-import User from '../components/user.vue'
-import Welcome from '../components/welcome.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -17,48 +14,48 @@ const routes = [
   },
   {
     path: '/home',
-    component: Home,
+    component: () => import(/* webPackChunk:"home-login" */ '../views/home.vue'),
     redirect: '/welcome',
     children: [
       {
         path: '/welcome',
-        component: Welcome
+        component: () => import(/* webPackChunkName:"home-login" */ '../components/welcome.vue')
       },
       {
         path: '/users',
-        component: User
+        component: () => import(/*webPackChunkName:"user"*/ '../components/user.vue')
       },
       {
         path: '/roles',//角色列表
-        component: () => import('../components/power/roles.vue')
+        component: () => import(/*webPackChunkName:"user"*/ '../components/power/roles.vue')
       },
       {
         path: '/rights',//权限列表
-        component: () => import('../components/power/right.vue')
+        component: () => import(/*webPackChunkName:"user"*/ '../components/power/right.vue')
       },
       {
         path: '/goods',//商品列表
-        component: () => import('../components/goods/goodlist.vue'),
+        component: () => import(/*webPackChunkName:"goods"*/ '../components/goods/goodlist.vue'),
       },
       {
         path: '/goods/addgood',
-        component: () => import('../components/goods/addgood.vue')
+        component: () => import(/*webPackChunkName:"goods"*/ '../components/goods/addgood.vue')
       },
       {
         path: '/categories',//商品分类
-        component: () => import('../components/goods/goodkid.vue')
+        component: () => import(/*webPackChunkName:"goods"*/ '../components/goods/goodkid.vue')
       },
       {
         path: '/params',//商品分类参数
-        component: () => import('../components/goods/goodparams.vue')
+        component: () => import(/*webPackChunkName:"goods"*/ '../components/goods/goodparams.vue')
       },
       {
         path: '/orders',//订单管理
-        component: () => import('../components/orders.vue')
+        component: () => import(/*webPackChunkName:"order"*/ '../components/orders.vue')
       },
       {
         path: '/reports',//数据报表
-        component: () => import('../components/reports.vue')
+        component: () => import(/*webPackChunkName:"order"*/ '../components/reports.vue')
       }
     ]
   }

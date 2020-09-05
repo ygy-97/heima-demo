@@ -12,7 +12,7 @@
     <!-- 主体内容 -->
     <el-card>
       <el-button type="primary" @click="dialogVisible = true">添加角色</el-button>
-      <el-table :data="rolesList" border stripe>
+      <el-table :data="rolesList" border stripe >
         <el-table-column type="expand">
           <template slot-scope="scope">
             <el-row
@@ -142,6 +142,7 @@ import axios from "axios";
 export default {
   data() {
     return {
+      
       rolesList: [], //角色列表
       powerList: [], //权限列表
       treeProps: {
@@ -411,6 +412,7 @@ export default {
         });
       }
       this.rolesList = res.data;
+      console.log(this.rolesList)
       // this.$message({
       //   center: true,
       //   message: "获取角色列表成功",

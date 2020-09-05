@@ -131,4 +131,7 @@ export default {
     height: 300px;
   }
 }
+.el-card{
+  margin-top: 10px;
+}
 </style>
