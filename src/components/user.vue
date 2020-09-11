@@ -59,7 +59,7 @@
                     <el-button
                       size="mini"
                       type="warning"
-                      icon="el-icon-s-tools"
+                      icon="el-icon-setting"
                       @click="assignRoles(scope.row)"
                     ></el-button>
                   </el-tooltip>

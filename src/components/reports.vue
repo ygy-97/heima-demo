@@ -40,6 +40,9 @@ export default {
       }
       console.log("xxx", this.options);
       myChart.setOption(res.data);
+      window.addEventListener("resize", function () {
+        myChart.resize();
+      });
     },
     getPie() {
       let myChart = echarts.init(document.getElementById("pie"));
@@ -88,6 +91,9 @@ export default {
         ],
       };
       myChart.setOption(option);
+      window.addEventListener("resize", function () {
+        myChart.resize();
+      });
     },
 
     // 得到数据
@@ -110,28 +116,34 @@ export default {
   mounted() {
     this.getLine();
     this.getPie();
+    // window.addEventListener("resize", function () {
+    //   myChart.resize();
+    // });
   },
 };
 </script>
 
 <style scoped lang='less'>
+.container{
+  min-width: 900px;
+}
 .echart {
-  display: flex ;
+  display: flex;
   justify-content: space-around;
   align-items: center;
   // border: 1px solid red;
   #line {
-    flex:1;
-    width: 50%;
+    flex: 1;
+    min-width: 450px;
     height: 300px;
   }
   #pie {
     flex: 1;
-    width: 50%;
+    min-width: 400px;
     height: 300px;
   }
 }
-.el-card{
+.el-card {
   margin-top: 10px;
 }
 </style>
